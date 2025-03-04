@@ -17,9 +17,14 @@ def main():
     except FileNotFoundError:
         print("Error opening input: File not found")
         sys.exit(1)
-    
+
     buffer = io.BytesIO()
-    raw_image.save(buffer, format=name_list[1])
+    try:
+        raw_image.save(buffer, format=name_list[1])
+    except Exception as e:
+        print("Error opening input: ", e)
+        sys.exit(1)
+        
     converted_file = buffer.getvalue()
     image = image_slice(converted_file, output_file_name)
     image.slice()
