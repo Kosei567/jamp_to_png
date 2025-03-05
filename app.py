@@ -24,7 +24,7 @@ def main():
     except Exception as e:
         print("Error opening input: ", e)
         sys.exit(1)
-        
+
     converted_file = buffer.getvalue()
     image = image_slice(converted_file, output_file_name)
     image.slice()
@@ -34,12 +34,16 @@ class image_slice:
     def __init__(self, image, output):
         self.image = image
         self.slice_list = np.empty([4,4], dtype=object)
+        self.over_slice = np.empty([2], dtype=object)
         self.output = output
 
     def slice(self):
         img = cv2.imdecode(np.frombuffer(self.image, np.uint8), cv2.IMREAD_COLOR)
 
-        height, width = 1185, 800
+        self.over_slice[0] = img[0:1184, 800:822]
+        self.over_slice[1] = img[1184:1200, 0:822]
+
+        height, width = 1184, 800
         x, y = 0, 0
         for i in range(4):
             for j in range(4):
@@ -54,8 +58,10 @@ class image_slice:
             for i in range(4):
                 row.append(cv2.hconcat([list_T[i][0], list_T[i][1], list_T[i][2], list_T[i][3]]))
             col = cv2.vconcat(row)
+            h_image = cv2.hconcat([col, self.over_slice[0]])
+            true_image = cv2.vconcat([h_image, self.over_slice[1]])
 
-            cv2.imwrite(self.output, col)
+            cv2.imwrite(self.output, true_image)
         
         coupling()
 
